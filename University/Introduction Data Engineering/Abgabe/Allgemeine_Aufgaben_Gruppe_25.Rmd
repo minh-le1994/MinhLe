@@ -1,0 +1,228 @@
+---
+title: "General Tasks"
+output: html_document
+---
+To solve the general tasks following packages were needed:
+```{r, eval = FALSE}
+#In case you don't have the following packages installed, run the follwoing code:
+install.packages("tidyverse")
+install.packages("knitr")
+
+```
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(knitr)
+```
+# Task 1
+First, we have to load the two required datasets. Before we can merge the two tables, we check if the columns that carry the same title also contain the same data. After we have done that, we can join the tables.
+Our goal is to calculate the delay in delivery ("Lieferverzug"). In order to do that we have to subtract the production date from the goods-in date. Once we have this information, we can identify the distribution, calculate the maximum, minimum and average delay and plot the distribution.
+
+Before answering this task we first need to create the dataset for the logistics delay: "Logistikverzug". The dataset was created with the following code:
+
+```{r, warning = FALSE}
+#Load the documents
+komponent <- read.csv("Data/Logistikverzug/komponente_k7.csv", header=TRUE, sep=";", stringsAsFactors = FALSE)
+logistik <- read.csv("Data/Logistikverzug/Logistikverzug_K7.csv", header=TRUE, sep=";", stringsAsFactors = FALSE)
+
+#Join the data
+logistik_komponent <- left_join(logistik,komponent,by=c("X","IDNummer","Werksnummer","Herstellernummer"),suffix = c(".1", ".2"))
+
+#Change the format of the Data Wareneingang and Produktionsdatum to a date attribute
+logistik_komponent$Wareneingang<-as.Date(logistik_komponent$Wareneingang,"%d.%m.%Y")
+logistik_komponent$Produktionsdatum<-as.Date(logistik_komponent$Produktionsdatum,"%Y-%m-%d")
+
+logistikverzug <- mutate(logistik_komponent, Logistikverzug = Wareneingang - Produktionsdatum) %>%
+  select(IDNummer, Logistikverzug)
+```
+
+The dataset used for solving this task can be seen in the following:
+```{r, results = 'asis', echo = FALSE}
+
+kable(logistikverzug[1:6, ], caption = "Logistic Delay of the Component K7")
+
+```
+
+
+a) **The distribution of the "Logistics Delay"**
+
+The distribution of the logistic delay was tested visually with the help of a Q-Q-Plot. Based on the following histogram we assuming that the logistic delay is a normal distribution.
+
+```{r}
+hist(as.numeric(logistikverzug$Logistikverzug), xlab = "Delay", main = "Histogramm of Logistical Delay")
+```
+
+Based on the assumption we tested if the delay is a normal distribution. To do that we plotted a Q-Q-Plot to decide if our assumption is right. The Q-Q Plot compares the data of the logistical delay with the theoretical quantiles. If the empiric and the theoretical quantiles of the respective distribution are close to each other the empiric data is distributed like the assumed distribution. Close to each other means here that the data is close to the diagonal you can see in the plot below.
+
+```{r}
+x <- scale(logistikverzug$Logistikverzug)
+qqnorm(x)
+qqline(x)
+```
+
+In this case you can see that the data is quite closed to the diagonal which shows the theoretical quantiles. **The delay is a normal distribution**.
+
+
+b) **Minimum and Maximum of the difference between goods outgoing and income**
+
+Here we will identify the mininum and maximum value of the logistic delay.
+
+```{r}
+#Identify the Minumum and Maximum Delay of the goods
+min(logistikverzug$Logistikverzug)
+max(logistikverzug$Logistikverzug)
+
+```
+
+The Maximum time difference between in- and outgoing goods is **13 days**.
+The Minimum time difference between in- and outgoing goods is **2 days**.
+
+
+c) **The mean of the "Logistics Delay"**
+
+Here we will identfy the mean of the logistic delay.
+
+```{r}
+mean(logistikverzug$Logistikverzug)
+```
+
+The average logistical delay of the component K7 is **5.080437 days**. 
+
+
+d) **Plot of the "Logistics Delay"**
+
+In the following you can find the distribution of the logistic delay as histogram.
+
+```{r}
+hist(as.numeric(logistikverzug$Logistikverzug), xlab = "Delay", main = "Histogramm of Logistical Delay")
+```
+
+# Task 2
+The concept is called a relational database system.
+
+The import of small tables is relatively easy with the standard procedures of R. The import of large tables typically results in very long import duration and a high working memory consumption though. In accordance with the relational database system is it, therefore, advisable to only import data segments that are necessary for the requested analysis.
+
+# Task 3
+We are looking for the numbers of cars which are registered in Dortmund and have the K7 component build into the car. For that, we first import the data sets which we need to extract this information.
+
+Import the relevant datasets:
+
+```{r, results = 'hide', message = FALSE, warning = FALSE}
+#Import the relation tables to connect them with the cars
+relation_oem1_11 <- read_csv2("Data/Fahrzeug/Bestandteile_Fahrzeuge_OEM1_Typ11.csv")
+relation_oem1_12 <- read_csv2("Data/Fahrzeug/Bestandteile_Fahrzeuge_OEM1_Typ12.csv")
+relation_oem2_21 <- read_csv2("Data/Fahrzeug/Bestandteile_Fahrzeuge_OEM2_Typ21.csv")
+relation_oem2_22 <- read_csv2("Data/Fahrzeug/Bestandteile_Fahrzeuge_OEM2_Typ22.csv")
+
+k7 <- as_tibble(read.table("Data/Komponente/Komponente_K7.txt", sep = "\t", stringsAsFactors = FALSE))
+
+zulassung <- read_csv2("Data/Zulassungen/Zulassungen_alle_Fahrzeuge.csv")
+
+```
+
+The data sets will be reduced to the relevant information to join them afterward. We need in all tables just the ID numbers of the component or the car. An exception is the dataset containing the registrations. In this dataset, we will also keep the location of the registration to solve this task. Because we just need this kind of data and the columns are fine in their structure, a full clean up of the datasets will not be made.
+
+```{r, results = 'hide'}
+
+relation_oem1_11_clean <- select(relation_oem1_11, ID_Karosserie, ID_Fahrzeug)
+relation_oem1_12_clean <- select(relation_oem1_12, ID_Karosserie, ID_Fahrzeug)
+relation_oem2_21_clean <- select(relation_oem2_21, ID_Karosserie, ID_Fahrzeug)
+relation_oem2_22_clean <- select(relation_oem2_22, ID_Karosserie, ID_Fahrzeug)
+
+k7_clean <- select(k7, ID_Karosserie)
+
+#change the name to make it uniform with the relation datasets for joining later
+zulassung_clean <- select(zulassung, IDNummer, Gemeinden)
+colnames(zulassung_clean)[1] <- "ID_Fahrzeug"
+
+```
+
+After that the data was joined together so that we can identify the relevant data
+
+```{r, results = 'hide', message = FALSE}
+
+relation_total <- rbind(relation_oem1_11_clean, relation_oem1_12_clean, relation_oem2_21_clean, relation_oem2_22_clean)
+final_data <- left_join(k7_clean, relation_total, by = "ID_Karosserie") %>%
+  left_join(zulassung_clean, by = "ID_Fahrzeug")
+
+```
+
+The next step is to identify all the cars registered in Dortmund. For that, we filtered just for the cars which are registered in Dortmund. Afterward, we summarised the data was summarised to show the number of cars registered in Dortmund with the K7 component.
+
+```{r}
+cars_k7_dortmund <- filter(final_data, Gemeinden == "DORTMUND") %>%
+  summarise(Amount_Cars_in_Dortmund = n())
+cars_k7_dortmund
+
+```
+
+The amount of cars with the componente K7 registered in Dortmund is **69**.
+
+# Task 4
+
+In this task, we should find out the data type of the attributes of the table "Zulassung_aller_Fahrzeuge". First of all the table will be imported. The attributes describe the columns of a dataset. Depending on how you import the data the datatype of the attributes can be different. We focus here on the import with the `readr` package. The dataset was first imported with the `read_csv2` as it has as separator a ",".
+
+```{r, message = FALSE, warning = FALSE}
+
+zulassung <- read_csv2("Data/Zulassungen/Zulassungen_alle_Fahrzeuge.csv")
+```
+
+To identify the data type of the attributes the fuction `class` was used.
+```{r}
+#check the type of the Data in every column
+
+#x is an "numeric"
+class(zulassung$X1)
+
+#IDNummer, Gemeinden are "character"
+class(zulassung$IDNummer)
+class(zulassung$Gemeinden)
+
+#Zulassung is a "date - format"
+class(zulassung$Zulassung)
+
+```
+
+With the results of the code before the data type of the attributes are the following:
+
+- X1: `numeric`
+- IDNummer: `character`
+- Gemeinden: `character`
+- Zulassung: `Date`
+
+# Task 5
+The backup on a server is effectively a prerequisite for an effective publication of the material. Using a server database has several advantages:
+
+a) Availability and access
+For the results to be comprehensible to others, they must have access to the underlying data at will. To ensure this, a personal computer is completely unsuitable. A server, on the other hand, is usually always available.
+
+b) Amount of data
+the data on which the analysis is based is very extensive and require a lot of time and bandwidth to read and process alone. if the data is read-only as required on the server, a lot of time and computing capacity is saved.
+
+(c) security
+if the data is stored on a server, access to it can generally be better controlled. In addition, the hardware of the servers also allows redundant storage, which offers higher security against technical failures.
+
+If the dataset would be saved on the own local computer, the application cannot be run from any other computer. The application could not access the dataset and the application would not work. 
+
+# Task 6
+For the task, we need to import some datasets. Based on the ID "K1BE2-104-1041-32050" we already know that the car needs to be part of the OEM 2 because they are the producer having the engine K1BE2 build into their car. Based on this information we will import the two related tables for the components and the OEM 2. The relation tables are enough because they already include the information about the ID of the car. To find out where the car is registered we need to also import the data regarding the registration.
+
+```{r, results = 'hide', warning= FALSE, message= FALSE}
+relation_oem2_21 <- read_csv2("Data/Fahrzeug/Bestandteile_Fahrzeuge_OEM2_Typ21.csv")
+relation_oem2_22 <- read_csv2("Data/Fahrzeug/Bestandteile_Fahrzeuge_OEM2_Typ22.csv")
+zulassung <- read_csv2("Data/Zulassungen/Zulassungen_alle_Fahrzeuge.csv")
+```
+
+```{r, results = 'hide'}
+relation_oem2 <- rbind(relation_oem2_21, relation_oem2_22)
+result <- filter(relation_oem2, ID_Motor == "K1BE2-104-1041-32050")
+result$ID_Fahrzeug
+```
+
+The engine is related to the car with the **ID = 21-2-21-51526**.
+Under the assumption that this variable corresponds to "IDNummer", we filter the table "zulassung" to find the corresponding registration location. The result of this filtering brings us to the location the car is registered in. The car is registered in **Leipzig**.
+
+```{r}
+location <- filter(zulassung, IDNummer == "21-2-21-51526")[[3]]
+location
+```
