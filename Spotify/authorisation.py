@@ -30,11 +30,11 @@ class SpotifyAuthorisation():
         self.scope = scope
         self.redirect_uri = redirect_uri
         
-    def read_token(self):
+    def read_token(self, document):
         """
         Reads the file with the information about the token.
         """
-        with open(r"C:\Users\KhacM\GitHub\MinhLe\Spotify\Authorisation/Token_info.txt", "r") as file:
+        with open(r"C:\Users\KhacM\GitHub\MinhLe\Spotify\Authorisation\{}".format(document), "r") as file:
                 token_info = file.read()
                 file.close()
 
@@ -49,12 +49,12 @@ class SpotifyAuthorisation():
         token a complete new token will be created and saved in .../Authorisation/Token_info.txt. 
         """
         try:
-            token_info = self.read_token()
+            token_info = self.read_token("Token_info.txt")
         except:
             print("It seems that there is no token available. A new token will be created.")
             self.get_token()
             
-            token_info = self.read_token()
+            token_info = self.read_token("Token_info.txt")
             
         #Test if the token is expired or not
         expired = self.test_token(token_info["access_token"])
@@ -63,12 +63,13 @@ class SpotifyAuthorisation():
         #new one will be created
         if expired:
             try:
+                token_info = self.read_token("Refresh.txt")
                 self.refresh_token(token_info["refresh_token"])
-                token_info = self.read_token()
+                token_info = self.read_token("Token_info.txt")
             except:
                 print("No Refresh Token found...")
                 self.get_token()
-                token_info = self.read_token()
+                token_info = self.read_token("Token_info.txt")
         return token_info
 
         
@@ -137,7 +138,7 @@ class SpotifyAuthorisation():
         
         if response.status_code == 200:
             token = response.json()["access_token"]
-            with open("Token_info.txt", "w+") as file:
+            with open("Authorisation/Token_info.txt", "w+") as file:
                 file.write(response.text)
                 file.close
             print("The token is refreshed.")

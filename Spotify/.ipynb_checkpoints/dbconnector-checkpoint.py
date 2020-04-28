@@ -27,7 +27,6 @@ class DatabaseHandler():
         """
         Function to connect to a database and the feedback, if that connection was succesful or not
         """
-        print(self.host, self.database, self.user, self.password, self.auth_plugin)
         self.connection = mysql.connector.connect(host=self.host, 
                                                   database=self.database, 
                                                   user=self.user, 
@@ -63,7 +62,7 @@ class DatabaseHandler():
                         row["object_type"]))
 
         self.cursor.executemany(query, val)
-        print(self.cursor.rowcount)
+        print("New Songs in the History {}".format(self.cursor.rowcount))
         
         #query for the song properties
         query = "INSERT IGNORE INTO song_data (Spotify_ID, Spotify_URI, Artist, Album, Duration, Acousticness, Danceability, Energy, Instrumentalness, key_spotify, Liveness, Loudness, Mode, Speechiness, Tempo, Time_Signature, Valence) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
@@ -88,6 +87,7 @@ class DatabaseHandler():
                        row["valence"])
                       )
         
+        print("New Songs in the database: {}".format(self.cursor.rowcount))
         self.cursor.executemany(query, val)
         
         self.connection.commit()
