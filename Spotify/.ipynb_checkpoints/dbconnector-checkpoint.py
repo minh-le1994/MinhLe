@@ -54,12 +54,18 @@ class DatabaseHandler():
         
         val = []
         for index, row in df.iterrows():
-            val.append((datetime.strptime(row["timestamp"], '%Y-%m-%dT%H:%M:%S.%fZ'), 
-                        row["name"], 
-                        row["id"], 
-                        row["uri"], 
-                        row["popularity"], 
-                        row["object_type"]))
+            #some songs don't have milisecond, so the dateformat needs to be adapted
+            try:
+                timestamp = datetime.strptime(row["timestamp"], '%Y-%m-%dT%H:%M:%S.%fZ')
+            except:
+                datetime.strptime(row["timestamp"], '%Y-%m-%dT%H:%M:%SZ')
+            finally:
+                val.append((timestamp, 
+                            row["name"], 
+                            row["id"], 
+                            row["uri"], 
+                            row["popularity"], 
+                            row["object_type"]))
 
         self.cursor.executemany(query, val)
         print("New Songs in the History {}".format(self.cursor.rowcount))

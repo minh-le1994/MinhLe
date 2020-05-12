@@ -69,8 +69,12 @@ class DataExtracter():
             dic[key] = []
             
         for element in response.json()["audio_features"]:
+            print(element)
             for key in keys:
-                dic[key].append(element[key])
+                try:
+                    dic[key].append(element[key])
+                except: 
+                    dic[key].append(0)
    
         self.song_data = pd.DataFrame(dic)
         
