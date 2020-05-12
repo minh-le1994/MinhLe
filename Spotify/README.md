@@ -21,10 +21,30 @@ The purpose of this project is to collect the most recent heard songs on spotify
 8. Automate the execution of the main.py file. If you have windows you can do that easily with the Windows Task Scheduler.
 
 ## Content of the Modules
-**main.py**: The main Python File to execute the data collection.
-**authorization.py**: Handles the Authorization of to access the Spotify Web Api after the Authorization Code Flow. More information about the Authorization and the Authoriztion Code Flow can be found here: https://developer.spotify.com/documentation/general/guides/authorization-guide/
-**dbconnector.py**: Handles the connection to the MySQL database and writes the information provided by the Spotify Web Api to it.
-**extractdata.py**: Handles the extraction of the recently listened songs and some audio features of this song. The extracted data will be returned as pandas Dataframe
+- **main.py**: The main Python File to execute the data collection.
+- **authorization.py**: Handles the Authorization of to access the Spotify Web Api after the Authorization Code Flow. More information about the Authorization and the Authoriztion Code Flow can be found here: https://developer.spotify.com/documentation/general/guides/authorization-guide/
+- **dbconnector.py**: Handles the connection to the MySQL database and writes the information provided by the Spotify Web Api to it.
+- **extractdata.py**: Handles the extraction of the recently listened songs and some audio features of this song. The extracted data will be returned as pandas Dataframe
+
+## Data Collected
+
+The following data will be collected and written to the database:
+ 
+ **Song History**
+ - ID (primary key, auto increment): This is the unique ID in your MySQL Database, which will update automatically
+ - Time: The time you listened to the song
+ - Song_Name: The Name of the Song
+ - Spotify_ID: The unique Spotify ID for that song. This is needed to join the tables with the second table "song_data"
+ - Spotify_URI: A unique identifier for each song specified by Spotify
+ - Popularity: The popularity of the song 
+ - Object_Type: The object type from where the song was played from
+ 
+ **Song Data**
+- Spotify_ID (primary key), Spotify_URI: The same like in Song History
+- Artist: The artist of the song:
+- Album: The album the song belongs to
+- Duration: The duration of the song
+- The following Audio Features: Acousticness, Danceability, Energy, Instrumentalness, key_spotify, Liveness, Loudness, Mode, Speechiness, Tempo, Time_Signature, Valence (More information about each can be found here: https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/)
 
 ## Restrictions
 - The Spotify Web Api can return a maximum of the last 50 listened songs. Keep that in mind if you want to collect the data to avoid gaps in it.
