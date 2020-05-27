@@ -1,3 +1,6 @@
+cd C:/Users/KhacM/GitHub/MinhLe2/
+git pull
+
 cd C:/Users/KhacM/GitHub/MinhLe2/COVID19/JohnHopkinsData
 
 git pull https://github.com/CSSEGISandData/COVID-19 
