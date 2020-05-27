@@ -1,9 +1,9 @@
-cd C:/Users/KhacM/GitHub/MinhLe/COVID19/JohnHopkinsData
+cd C:/Users/KhacM/GitHub/MinhLe2/COVID19/JohnHopkinsData
 
 git pull https://github.com/CSSEGISandData/COVID-19 
 
-cd C:/Users/KhacM/GitHub/MinhLe/COVID19
-py "C:/Users/KhacM/GitHub/COVID-19/DataProcessing.py"
+cd C:/Users/KhacM/GitHub/MinhLe2/COVID19
+python "C:/Users/KhacM/GitHub/MinhLe2/COVID19/DataProcessing.py"
 
 git add .
 git commit -m "Updates"

@@ -34,7 +34,7 @@ class SpotifyAuthorisation():
         """
         Reads the file with the information about the token.
         """
-        with open(r"C:\Users\KhacM\GitHub\MinhLe\Spotify\Authorisation\{}".format(document), "r") as file:
+        with open(r"C:\Users\KhacM\GitHub\MinhLe2\Spotify\Authorisation\{}".format(document), "r") as file:
                 token_info = file.read()
                 file.close()
 
